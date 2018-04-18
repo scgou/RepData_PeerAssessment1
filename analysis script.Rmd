@@ -8,6 +8,15 @@ output:
 
 ## Loading and preprocessing the data
 
+```{r}
+print("Hello")
+getwd()
+knitr:::input_dir()
+getSrcDirectory(function(dummy) { dummy })
+
+
+```
+
 
 
 ## What is mean total number of steps taken per day?
