@@ -5,24 +5,25 @@
 
 
 ```r
-library(dplyr)
+library(tidyverse)
 ```
 
 ```
-## 
-## Attaching package: 'dplyr'
+## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr
 ```
 
 ```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
+## Conflicts with tidy packages ----------------------------------------------
 ```
 
 ```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
+## filter(): dplyr, stats
+## lag():    dplyr, stats
 ```
 
 ```r
@@ -56,10 +57,30 @@ plot(dint$interval, dint$avg, type="l", main="Time series plot of average steps 
 
 ![](analysis_script_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
-The 5-minute interval with the contains the maximum number of steps averaged across all the days is 835.
+The 5-minute interval which contains the maximum number of steps averaged across all the days is 835.
 
 ## Imputing missing values
+Missing values will be the interval averaged ones calculated above.
 
+```r
+mv <- sum(is.na(data$steps))
+cdata <- data.frame(data)
+for (i in 1:length(cdata$steps)) {
+  if (is.na(cdata$steps[i])) {
+    cdata$steps[i] <- dint$avg[which(dint$interval == cdata$interval[i])]
+  }
+}
+cds <- cdata %>% group_by(date) %>% summarise(daily = sum(steps))
+cms <- round(mean(cds$daily, na.rm=TRUE), 0)
+cmd <- round(median(cds$daily, na.rm=TRUE), 0)
+hist(cds$daily, main="Histogram of NA corrected daily steps totals", xlab="Daily steps")
+```
+
+![](analysis_script_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+There are 2304 missing values in the step data. I replaced the missing values with the average number of steps for the specific intervals calculated across all the days.
+
+For this corrected data, the new mean of the daily steps is 10766 and the new median is 10766.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?

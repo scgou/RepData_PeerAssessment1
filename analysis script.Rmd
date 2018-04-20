@@ -39,8 +39,22 @@ The 5-minute interval which contains the maximum number of steps averaged across
 ## Imputing missing values
 Missing values will be the interval averaged ones calculated above.
 ```{r, echo=TRUE}
-
+mv <- sum(is.na(data$steps))
+cdata <- data.frame(data)
+for (i in 1:length(cdata$steps)) {
+  if (is.na(cdata$steps[i])) {
+    cdata$steps[i] <- dint$avg[which(dint$interval == cdata$interval[i])]
+  }
+}
+cds <- cdata %>% group_by(date) %>% summarise(daily = sum(steps))
+cms <- round(mean(cds$daily, na.rm=TRUE), 0)
+cmd <- round(median(cds$daily, na.rm=TRUE), 0)
+hist(cds$daily, main="Histogram of NA corrected daily steps totals", xlab="Daily steps")
 ```
+
+There are `r mv` missing values in the step data. I replaced the missing values with the average number of steps for the specific intervals calculated across all the days.
+
+For this corrected data, the new mean of the daily steps is `r cms` and the new median is `r cmd`.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
