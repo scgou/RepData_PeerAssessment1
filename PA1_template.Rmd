@@ -10,6 +10,8 @@ output:
 
 ```{r, echo=TRUE}
 library(tidyverse)
+library(timeDate)
+library(lattice)
 data <- read.csv("activity.csv")
 ```
 
@@ -19,8 +21,8 @@ data <- read.csv("activity.csv")
 ```{r, echo=TRUE}
 options(scipen=999)
 ds <- data %>% group_by(date) %>% summarise(daily = sum(steps))
-ms <- round(mean(ds$daily, na.rm=TRUE), 0)
-md <- round(median(ds$daily, na.rm=TRUE), 0)
+ms <- round(mean(ds$daily, na.rm=TRUE), 1)
+md <- round(median(ds$daily, na.rm=TRUE), 1)
 hist(ds$daily, main="Histogram of daily steps totals", xlab="Daily steps")
 ```
 
@@ -47,14 +49,22 @@ for (i in 1:length(cdata$steps)) {
   }
 }
 cds <- cdata %>% group_by(date) %>% summarise(daily = sum(steps))
-cms <- round(mean(cds$daily, na.rm=TRUE), 0)
-cmd <- round(median(cds$daily, na.rm=TRUE), 0)
+cms <- round(mean(cds$daily), 1)
+cmd <- round(median(cds$daily), 1)
 hist(cds$daily, main="Histogram of NA corrected daily steps totals", xlab="Daily steps")
 ```
 
 There are `r mv` missing values in the step data. I replaced the missing values with the average number of steps for the specific intervals calculated across all the days.
 
-For this corrected data, the new mean of the daily steps is `r cms` and the new median is `r cmd`.
+For this corrected data, the new mean of the daily steps is `r cms` and the new median is `r cmd`.  There is little impact on the mean and median locations by making these changes and the distribution is unchanged.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r, echo=TRUE}
+cdata$when <- factor(isWeekend(as.POSIXct(cdata$date)), labels=c("Weekend", "Weekday"), levels=c(TRUE,FALSE))
+by_group <- cdata %>% group_by(when, interval)
+setint <- summarise(by_group, avg=mean(steps, na.rm=TRUE))
+xyplot(avg ~ interval | when, data = setint, layout=c(1,2), type = "l", xlab = "Interval (5 min)", ylab = "Steps")
+```
+
+
